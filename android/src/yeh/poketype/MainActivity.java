@@ -1,7 +1,11 @@
 package yeh.poketype;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import yeh.poketype.ClearableAutoCompleteTextView.OnClearListener;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -45,6 +49,21 @@ public class MainActivity extends ActionBarActivity {
 
 		// Hide the search field
 		showSearch(false);
+
+		// Populate the AutoCompleteTextView with suggestions
+		ArrayList<PokemonSearchItem> pokemon = new ArrayList<PokemonSearchItem>();
+		String[] pokemon_names = getResources().getStringArray(
+		        R.array.pokemon_names);
+		TypedArray icons = getResources().obtainTypedArray(
+		        R.array.pokemon_icons);
+		for (int i = 0; i < icons.length(); i++) {
+			pokemon.add(new PokemonSearchItem(i + 1, pokemon_names[i], icons
+			        .getDrawable(i)));
+		}
+		icons.recycle();
+		Collections.sort(pokemon);
+		PokemonSuggestAdapter adapter = new PokemonSuggestAdapter(this, pokemon);
+		mSearchBox.setAdapter(adapter);
 
 		// When the search icon is clicked, hide search icon, show the search
 		// field
