@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="fill_horizontal"
+    android:focusable="true" >
+ 	<TextView
+ 	    android:id="@+id/app_name"
+ 	    android:layout_width="wrap_content"
+ 	    android:layout_height="wrap_content"
+ 	    android:layout_centerVertical="true"
+ 	    android:text="@string/app_name"
+ 	    android:textColor="#FFFFFF"
+ 	    android:textSize="18sp" />
+ 	
+    <yeh.poketype.ClearableAutoCompleteTextView
+        android:id="@+id/search"
+        android:hint="@string/search_hint"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/app_name"
+        android:layout_marginLeft="10dp"
+        android:layout_centerVertical="true"
+        android:dropDownHeight="wrap_content"
+        android:dropDownVerticalOffset="0dp"
+        android:dropDownWidth="wrap_content"
+        android:inputType="textVisiblePassword"
+        android:textCursorDrawable="@null"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/textfield_activated_holo_dark" />
+    
+    <ImageView 
+        android:id="@+id/search_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:paddingRight="10dp"
+        android:src="@drawable/ic_action_search" />
+ 
+</RelativeLayout>
