@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:src="@drawable/background" />
-    
+
     <LinearLayout
         android:id="@+id/help"
         android:layout_width="match_parent"
@@ -20,17 +20,28 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="4.5"
-            android:src="@drawable/help"
-            android:scaleType="fitCenter" />
+            android:scaleType="fitCenter"
+            android:src="@drawable/help" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="5.5" />
     </LinearLayout>
-    
-    
-    
+
+    <LinearLayout
+        android:id="@+id/pokemon_data"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <TextView
+            android:id="@+id/pokemon_info"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
     <ProgressBar
         android:id="@+id/loading"
         android:layout_width="wrap_content"
