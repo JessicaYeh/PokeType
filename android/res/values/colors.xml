@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <color name="dark_red_border">#6d0c0c</color>
+    <color name="dark_red_background">#ec6060</color>
+    <color name="light_red_background">#f0d8d8</color>
+    
+    <color name="normal_border">#6d6d4e</color>
+    <color name="normal">#a8a878</color>
+    <color name="fighting_border">#7d1f1a</color>
+    <color name="fighting">#c03028</color>
+    <color name="flying_border">#6d5e9c</color>
+    <color name="flying">#a890f0</color>
+    <color name="poison_border">#682a68</color>
+    <color name="poison">#a040a0</color>
+    <color name="ground_border">#927d44</color>
+    <color name="ground">#e0c068</color>
+    <color name="rock_border">#786824</color>
+    <color name="rock">#b8a038</color>
+    <color name="bug_border">#6d7815</color>
+    <color name="bug">#a8b820</color>
+    <color name="ghost_border">#493963</color>
+    <color name="ghost">#705898</color>
+    <color name="steel_border">#787887</color>
+    <color name="steel">#b8b8d0</color>
+    <color name="fire_border">#9c531f</color>
+    <color name="fire">#f08030</color>
+    <color name="water_border">#445e9c</color>
+    <color name="water">#6890f0</color>
+    <color name="grass_border">#4e8234</color>
+    <color name="grass">#78c850</color>
+    <color name="electric_border">#a1871f</color>
+    <color name="electric">#f8d030</color>
+    <color name="psychic_border">#a13959</color>
+    <color name="psychic">#f85888</color>
+    <color name="ice_border">#638d8d</color>
+    <color name="ice">#98d8d8</color>
+    <color name="dragon_border">#4924a1</color>
+    <color name="dragon">#7038f8</color>
+    <color name="dark_border">#49392f</color>
+    <color name="dark">#705848</color>
+    <color name="fairy_border">#9b6470</color>
+    <color name="fairy">#ee99ac</color>
+    
+</resources>

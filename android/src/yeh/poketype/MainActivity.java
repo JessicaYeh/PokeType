@@ -1,17 +1,22 @@
 package yeh.poketype;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 
 import org.json.JSONObject;
 
 import yeh.poketype.ClearableAutoCompleteTextView.OnClearListener;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,16 +31,23 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity {
-	// Action bar items
+	private Bitmap mImageDownload = null;
+
+	// Action bar views
 	private ClearableAutoCompleteTextView mSearchBox;
 	private ImageView mSearchIcon;
 
-	// Main content area items
+	// Main content area views
 	private FrameLayout mContent;
 	private LinearLayout mHelp;
 	private LinearLayout mData;
 	private ProgressBar mLoading;
-	private TextView mInfo;
+
+	// Pokemon info views
+	private ImageView mImage;
+	private TextView mPokemonName;
+	private TextView mPokemonType1;
+	private TextView mPokemonType2;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +59,10 @@ public class MainActivity extends ActionBarActivity {
 		mHelp = (LinearLayout) findViewById(R.id.help);
 		mData = (LinearLayout) findViewById(R.id.pokemon_data);
 		mLoading = (ProgressBar) findViewById(R.id.loading);
-		mInfo = (TextView) findViewById(R.id.pokemon_info);
+		mImage = (ImageView) findViewById(R.id.pokemon_image);
+		mPokemonName = (TextView) findViewById(R.id.pokemon_name);
+		mPokemonType1 = (TextView) findViewById(R.id.pokemon_type1);
+		mPokemonType2 = (TextView) findViewById(R.id.pokemon_type2);
 
 		// Inflate custom view that has a search field for action bar
 		ActionBar actionBar = getSupportActionBar();
@@ -149,6 +164,32 @@ public class MainActivity extends ActionBarActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return super.onOptionsItemSelected(item);
 	}
+	
+	// Capitalize the first letter of a string
+	private String capitalizeFirst(String str) {
+		if (str.length() == 0)
+			return str;
+		return str.substring(0, 1).toUpperCase(Locale.getDefault())
+		        + str.substring(1);
+	}
+
+	// Download an image from the imageUrl and return it.
+	private Bitmap downloadImage(String imageUrl) {
+		if (mImageDownload != null) {
+			mImageDownload.recycle();
+			mImageDownload = null;
+		}
+
+		URL url;
+		try {
+			url = new URL(imageUrl);
+			mImageDownload = BitmapFactory.decodeStream(url.openStream());
+		} catch (Exception e) {
+			Log.e("Error", e.getMessage());
+			e.printStackTrace();
+		}
+		return mImageDownload;
+	}
 
 	// AsyncTask for searching for Pokemon
 	private class SearchTask extends AsyncTask<String, Void, PokemonData> {
@@ -170,31 +211,60 @@ public class MainActivity extends ActionBarActivity {
 			// Check whether to search by id or name
 			try {
 				Integer.parseInt(params[0]);
-				url = "http://poketype.floccul.us/api/pokemon/id/"
-				        + params[0];
+				url = "http://poketype.floccul.us/api/pokemon/id/" + params[0];
 			} catch (NumberFormatException e) {
 				url = "http://poketype.floccul.us/api/pokemon/" + params[0];
 			}
-			
+
 			// Download data
 			AjaxRequest request = new AjaxRequest("GET", url);
 			JSONObject data;
 			try {
 				data = new JSONObject(request.send());
 				if (!data.isNull("id")) {
-					pokemon = new PokemonData(data, null);
+					Bitmap image = downloadImage(data.getString("image"));
+					pokemon = new PokemonData(data, image);
 				}
 			} catch (Exception e) {
 			}
-			
+
 			return pokemon;
 		}
 
 		@Override
 		protected void onPostExecute(PokemonData result) {
 			if (result != null) {
-				mHelp.setVisibility(View.GONE);
-				mInfo.setText(result.mInfo.toString());
+				// Update the image
+				mImage.setImageBitmap(result.mImage);
+
+				// Update the Pokemon info
+				try {
+					
+					// Update the Pokemon name
+					mPokemonName.setText(result.mInfo.getString("name"));
+
+					// Update the Pokemon types
+					String type1 = result.mInfo.getString("type1");
+					String type2 = result.mInfo.getString("type2");
+					mPokemonType1.setText(capitalizeFirst(type1));
+					mPokemonType1.setBackgroundResource(getResources()
+					        .getIdentifier(type1 + "_background", "drawable",
+					                getPackageName()));
+					if (type2.equals("null")) {
+						mPokemonType2.setVisibility(View.GONE);
+					} else {
+						mPokemonType2.setVisibility(View.VISIBLE);
+						mPokemonType2.setText(capitalizeFirst(type2));
+						mPokemonType2.setBackgroundResource(getResources()
+						        .getIdentifier(type2 + "_background",
+						                "drawable", getPackageName()));
+					}
+
+					// Hide help
+					mHelp.setVisibility(View.GONE);
+
+				} catch (Exception e) {
+				}
 			}
 
 			// Hide loading spinner
