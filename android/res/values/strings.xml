@@ -3,5 +3,15 @@
 
     <string name="app_name">PokéType</string>
     <string name="search_hint">Search Pokémon</string>
+    
+    <string name="error_title_no_internet">No Internet Connection</string>
+    <string name="error_message_no_internet">Please check your Internet connection and try again.</string>
+    <string name="error_title_http">Server Error</string>
+    <string name="error_message_http">An error occurred in getting data from the server.</string>
+    <string name="error_title_no_pokemon">Pokémon Not Found</string>
+    <string name="error_message_no_pokemon">There was no Pokémon found whose name starts with</string>
+    <string name="error_title_unknown">Unknown Error</string>
+    <string name="error_message_unknown">An unknown error occurred.</string>
+    <string name="error_exit">OK</string>
 
 </resources>

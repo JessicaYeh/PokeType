@@ -8,10 +8,14 @@ import java.util.Locale;
 import org.json.JSONObject;
 
 import yeh.poketype.ClearableAutoCompleteTextView.OnClearListener;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -31,6 +35,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity {
+	private Context mContext = this;
 	private Bitmap mImageDownload = null;
 
 	// Action bar views
@@ -164,7 +169,7 @@ public class MainActivity extends ActionBarActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	// Capitalize the first letter of a string
 	private String capitalizeFirst(String str) {
 		if (str.length() == 0)
@@ -173,26 +178,13 @@ public class MainActivity extends ActionBarActivity {
 		        + str.substring(1);
 	}
 
-	// Download an image from the imageUrl and return it.
-	private Bitmap downloadImage(String imageUrl) {
-		if (mImageDownload != null) {
-			mImageDownload.recycle();
-			mImageDownload = null;
-		}
-
-		URL url;
-		try {
-			url = new URL(imageUrl);
-			mImageDownload = BitmapFactory.decodeStream(url.openStream());
-		} catch (Exception e) {
-			Log.e("Error", e.getMessage());
-			e.printStackTrace();
-		}
-		return mImageDownload;
-	}
-
 	// AsyncTask for searching for Pokemon
 	private class SearchTask extends AsyncTask<String, Void, PokemonData> {
+		private boolean mNetworkConnected = false;
+		private boolean mHttpSuccess = false;
+		private boolean mPokemonFound = false;
+		private String mQuery = "";
+
 		@Override
 		protected void onPreExecute() {
 			// Show loading spinner
@@ -207,25 +199,28 @@ public class MainActivity extends ActionBarActivity {
 		protected PokemonData doInBackground(String... params) {
 			PokemonData pokemon = null;
 
-			String url = "";
-			// Check whether to search by id or name
-			try {
-				Integer.parseInt(params[0]);
-				url = "http://poketype.floccul.us/api/pokemon/id/" + params[0];
-			} catch (NumberFormatException e) {
-				url = "http://poketype.floccul.us/api/pokemon/" + params[0];
-			}
+			mNetworkConnected = hasInternet();
 
-			// Download data
-			AjaxRequest request = new AjaxRequest("GET", url);
-			JSONObject data;
-			try {
-				data = new JSONObject(request.send());
-				if (!data.isNull("id")) {
-					Bitmap image = downloadImage(data.getString("image"));
-					pokemon = new PokemonData(data, image);
+			// Search for the Pokemon if there is an Internet connection
+			if (mNetworkConnected) {
+				mQuery = params[0];
+				
+				// Download data
+				AjaxRequest request = new AjaxRequest("GET", getPokemonUrl(mQuery));
+				JSONObject data;
+				try {
+					data = new JSONObject(request.send());
+					if (!data.isNull("id")) {
+						Bitmap image = downloadImage(data.getString("image"));
+						pokemon = new PokemonData(data, image);
+						mPokemonFound = true;
+					} else {
+						mPokemonFound = false;
+					}
+					mHttpSuccess = true;
+				} catch (Exception e) {
+					mHttpSuccess = false;
 				}
-			} catch (Exception e) {
 			}
 
 			return pokemon;
@@ -239,7 +234,7 @@ public class MainActivity extends ActionBarActivity {
 
 				// Update the Pokemon info
 				try {
-					
+
 					// Update the Pokemon name
 					mPokemonName.setText(result.mInfo.getString("name"));
 
@@ -266,6 +261,28 @@ public class MainActivity extends ActionBarActivity {
 				} catch (Exception e) {
 				}
 			}
+			else {
+				// Display an error
+				String errorTitle = "";
+				String errorMessage = "";
+				
+				if (!mNetworkConnected) {
+					errorTitle = getString(R.string.error_title_no_internet);
+					errorMessage = getString(R.string.error_message_no_internet);
+				} else if (!mHttpSuccess) {
+					errorTitle = getString(R.string.error_title_http);
+					errorMessage = getString(R.string.error_message_http);
+				} else if (!mPokemonFound) {
+					errorTitle = getString(R.string.error_title_no_pokemon);
+					errorMessage = getString(R.string.error_message_no_pokemon)
+					        + " '" + mQuery + "'";
+				} else {
+					errorTitle = getString(R.string.error_title_unknown);
+					errorMessage = getString(R.string.error_message_unknown);
+				}
+
+				showError(errorTitle, errorMessage);
+			}
 
 			// Hide loading spinner
 			mLoading.setVisibility(View.GONE);
@@ -273,6 +290,72 @@ public class MainActivity extends ActionBarActivity {
 			if (mHelp.getVisibility() == View.GONE) {
 				mData.setVisibility(View.VISIBLE);
 			}
+		}
+
+		
+		// Download an image from the imageUrl and return it.
+		private Bitmap downloadImage(String imageUrl) {
+			// If the image exists, recycle it, to prevent memory leaks.
+			if (mImageDownload != null) {
+				mImageDownload.recycle();
+				mImageDownload = null;
+			}
+
+			URL url;
+			try {
+				url = new URL(imageUrl);
+				mImageDownload = BitmapFactory.decodeStream(url.openStream());
+			} catch (Exception e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
+			}
+
+			return mImageDownload;
+		}
+
+		// Returns the URL to get the Pokemon data using the given query
+		private String getPokemonUrl(String query) {
+			String url;
+
+			// Check whether to search by id or name
+			try {
+				Integer.parseInt(query);
+				url = "http://poketype.floccul.us/api/pokemon/id/" + query;
+			} catch (NumberFormatException e) {
+				url = "http://poketype.floccul.us/api/pokemon/" + query;
+			}
+
+			return url;
+		}
+
+		// Check whether there is an Internet connection.
+		private boolean hasInternet() {
+			ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+			NetworkInfo networkInfo = connectivityManager
+			        .getActiveNetworkInfo();
+			if (networkInfo != null) {
+				return true;
+			}
+			return false;
+		}
+		
+		// Display an error popup with the given title and message.
+		private void showError(String title, String message) {
+			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+			        mContext);
+			alertDialogBuilder.setTitle(title);
+			alertDialogBuilder
+			        .setMessage(message)
+			        .setCancelable(false)
+			        .setPositiveButton(getString(R.string.error_exit),
+			                new DialogInterface.OnClickListener() {
+				                public void onClick(DialogInterface dialog,
+				                        int id) {
+					                dialog.cancel();
+				                }
+			                });
+			AlertDialog alertDialog = alertDialogBuilder.create();
+			alertDialog.show();
 		}
 	}
 
