@@ -3,11 +3,9 @@
 
     <string name="app_name">PokéType</string>
     <string name="search_hint">Search Pokémon</string>
-    
     <string name="weaknesses">Weaknesses</string>
     <string name="normal_damage">Normal Damage</string>
     <string name="resistances">Resistances</string>
-    
     <string name="error_title_no_internet">No Internet Connection</string>
     <string name="error_message_no_internet">Please check your Internet connection and try again.</string>
     <string name="error_title_http">Server Error</string>

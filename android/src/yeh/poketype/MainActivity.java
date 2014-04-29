@@ -12,6 +12,7 @@ import yeh.poketype.ClearableAutoCompleteTextView.OnClearListener;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -170,6 +171,14 @@ public class MainActivity extends ActionBarActivity {
 			        }
 		        });
 
+		// When the list button (in center) is clicked, open the list activity
+		mListButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(mContext, PokemonList.class);
+				startActivityForResult(intent, 1);
+			}
+		});
 	}
 
 	@Override
