@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
+    <color name="transparent_white">#7dffffff</color>
     <color name="dark_red_border">#6d0c0c</color>
     <color name="dark_red_background">#ec6060</color>
-    <color name="light_red_background">#f0d8d8</color>
+    <color name="light_red_background">#7df0d8d8</color>
     
     <color name="normal_border">#6d6d4e</color>
     <color name="normal">#a8a878</color>
