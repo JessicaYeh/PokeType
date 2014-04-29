@@ -2,7 +2,9 @@ package yeh.poketype;
 
 import java.util.ArrayList;
 
+import android.app.Activity;
 import android.app.ListActivity;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.widget.ListView;
 
 public class PokemonList extends ListActivity {
+	public final static String POKEMON_ID = "yeh.poketype.POKEMON_ID";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,10 @@ public class PokemonList extends ListActivity {
 	
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		Log.d("JY", ""+id);
+		// Pass the selected Pokemon id to the main screen
+	    Intent mIntent = new Intent();
+	    mIntent.putExtra(POKEMON_ID, ""+id);
+	    setResult(Activity.RESULT_OK, mIntent);
+	    finish();
 	}
 }

@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import yeh.poketype.ClearableAutoCompleteTextView.OnClearListener;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -192,6 +193,16 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return super.onOptionsItemSelected(item);
+	}
+	
+	// Get the Pokemon id from the Pokemon list activity and search for it
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+			String id = data.getStringExtra(PokemonList.POKEMON_ID);
+			if (!id.equals("")) {
+				new SearchTask().execute(id);
+			}
+		}
 	}
 
 	// Fill the ExpandableListView groups with weaknesses, normal, and
