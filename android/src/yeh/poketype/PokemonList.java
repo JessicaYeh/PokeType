@@ -3,26 +3,27 @@ package yeh.poketype;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
-public class PokemonList extends ListActivity {
+public class PokemonList extends ActionBarActivity {
 	public final static String POKEMON_ID = "yeh.poketype.POKEMON_ID";
 	private SharedPreferences sharedPref;
 	private SharedPreferences.Editor editor;
 	
 	private Spinner mType1;
 	private Spinner mType2;
+	private ListView mListView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +53,12 @@ public class PokemonList extends ListActivity {
 		}
 
 		// Insert the Pokemon into the ListView.
+		mListView = (ListView) findViewById(R.id.list);
 		PokemonListAdapter adapter = new PokemonListAdapter(this, pokemon);
-		setListAdapter(adapter);
+		mListView.setAdapter(adapter);
+		
+		// Set click listener on the list view
+		mListView.setOnItemClickListener(new PokemonClickListener());
 		
 		// Restore state information from shared preferences
 		int type1 = sharedPref.getInt("pokemon_type1", 0);
@@ -66,7 +71,7 @@ public class PokemonList extends ListActivity {
 		}
 		int position = sharedPref.getInt("pokemon_list_position", 0);
 		if (position != 0) {
-			getListView().setSelectionFromTop(position, 0);
+			mListView.setSelectionFromTop(position, 0);
 		}
 	}
 
@@ -82,14 +87,20 @@ public class PokemonList extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-		// Pass the selected Pokemon id to the main screen
-		Intent mIntent = new Intent();
-		mIntent.putExtra(POKEMON_ID, "" + id);
-		setResult(Activity.RESULT_OK, mIntent);
-		saveState();
-		finish();
+	// Click listener for the Pokemon in the ListView. Returns to the 
+	// main activity and searches for that Pokemon.
+	private class PokemonClickListener implements
+	        ListView.OnItemClickListener {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+		        long id) {
+			// Pass the selected Pokemon id to the main screen
+			Intent mIntent = new Intent();
+			mIntent.putExtra(POKEMON_ID, "" + id);
+			setResult(Activity.RESULT_OK, mIntent);
+			saveState();
+			finish();
+		}
 	}
 	
 	@Override
@@ -107,7 +118,7 @@ public class PokemonList extends ListActivity {
 	// Store information in the shared preferences so that when the list
 	// activity is opened again, things are in the same place
 	private void saveState() {
-		editor.putInt("pokemon_list_position", getListView().getFirstVisiblePosition());
+		editor.putInt("pokemon_list_position", mListView.getFirstVisiblePosition());
 		editor.putInt("pokemon_type1", mType1.getSelectedItemPosition());
 		editor.putInt("pokemon_type2", mType2.getSelectedItemPosition());
 		editor.commit();

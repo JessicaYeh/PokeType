@@ -14,6 +14,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +22,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -42,6 +44,9 @@ import android.widget.TextView;
 public class MainActivity extends ActionBarActivity {
 	private Context mContext = this;
 	private Bitmap mImageDownload = null;
+	
+	private SharedPreferences sharedPref;
+	private SharedPreferences.Editor editor;
 
 	// Action bar views
 	private ClearableAutoCompleteTextView mSearchBox;
@@ -69,6 +74,14 @@ public class MainActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		// Open preferences file
+		sharedPref = PreferenceManager
+		        .getDefaultSharedPreferences(getApplicationContext());
+		editor = sharedPref.edit();
+		// The list activity hasn't been opened yet
+		editor.putBoolean("pokemon_list_opened", false);
+		editor.commit();
 
 		// Get handle to views in activity_main
 		mContent = (FrameLayout) findViewById(R.id.content);
@@ -176,6 +189,13 @@ public class MainActivity extends ActionBarActivity {
 		mListButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				// Record that the list activity has been opened
+				boolean listOpened = sharedPref.getBoolean("pokemon_list_opened", false);
+				if (!listOpened) {
+					editor.putBoolean("pokemon_list_opened", true);
+					editor.commit();
+				}
+				// Start the list activity
 				Intent intent = new Intent(mContext, PokemonList.class);
 				startActivityForResult(intent, 1);
 			}
@@ -193,6 +213,21 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	public void onBackPressed() {
+		// If the list activity has already been opened during the lifecycle of
+		// the app, pressing back will take you to that activity. Otherwise,
+		// the back button has default behavior.
+		boolean listOpened = sharedPref.getBoolean("pokemon_list_opened", false);
+		if (listOpened) {
+			Intent intent = new Intent(mContext, PokemonList.class);
+			startActivityForResult(intent, 1);
+		}
+		else {
+		    super.onBackPressed();
+		}
 	}
 	
 	// Get the Pokemon id from the Pokemon list activity and search for it

@@ -125,7 +125,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:background="@drawable/button_effect"
-        android:src="@drawable/ic_action_view_as_list"
+        android:src="@drawable/ic_list"
         android:gravity="center" />
 
     <ProgressBar
