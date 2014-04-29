@@ -29,11 +29,7 @@
         </activity>
         <activity
             android:name="yeh.poketype.PokemonList"
-            android:label="@string/app_name"
-            android:parentActivityName="yeh.poketype.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="yeh.poketype.MainActivity" />
+            android:label="@string/app_name" >
         </activity>
     </application>
 
