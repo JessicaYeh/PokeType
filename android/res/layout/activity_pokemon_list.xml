@@ -41,7 +41,8 @@
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/transparent_white" />
+            android:background="@color/less_transparent_white"
+            android:cacheColorHint="#00000000" />
     </LinearLayout>
 
 </FrameLayout>

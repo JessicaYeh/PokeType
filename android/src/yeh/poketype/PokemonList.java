@@ -46,13 +46,10 @@ public class PokemonList extends ListActivity {
 		// Get the arrays of Pokemon types.
 		String[] pokemonTypes1 = res.getStringArray(R.array.pokemon_types1);
 		String[] pokemonTypes2 = res.getStringArray(R.array.pokemon_types2);
-		// Get the array of Pokemon icons.
-		TypedArray icons = res.obtainTypedArray(R.array.pokemon_icons);
-		for (int i = 0; i < icons.length(); i++) {
-			pokemon.add(new PokemonSearchItem(i + 1, pokemonNames[i], icons
-			        .getDrawable(i), pokemonTypes1[i], pokemonTypes2[i]));
+		// Create the list of Pokemon.
+		for (int i = 0; i < pokemonNames.length; i++) {
+			pokemon.add(new PokemonSearchItem(i + 1, pokemonNames[i], null, pokemonTypes1[i], pokemonTypes2[i]));
 		}
-		icons.recycle();
 
 		// Insert the Pokemon into the ListView.
 		PokemonListAdapter adapter = new PokemonListAdapter(this, pokemon);
