@@ -27,7 +27,8 @@
         android:inputType="textVisiblePassword"
         android:textCursorDrawable="@null"
         android:textColor="#FFFFFF"
-        android:background="@drawable/textfield_activated_holo_dark" />
+        android:background="@drawable/textfield_activated_holo_dark"
+        android:completionThreshold="1" />
     
     <ImageView 
         android:id="@+id/search_icon"

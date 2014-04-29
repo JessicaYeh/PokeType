@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import yeh.poketype.ClearableAutoCompleteTextView.OnClearListener;
@@ -28,7 +29,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -47,12 +50,18 @@ public class MainActivity extends ActionBarActivity {
 	private LinearLayout mHelp;
 	private LinearLayout mData;
 	private ProgressBar mLoading;
+	private ImageButton mListButton;
 
 	// Pokemon info views
 	private ImageView mImage;
 	private TextView mPokemonName;
 	private TextView mPokemonType1;
 	private TextView mPokemonType2;
+
+	// Type effectiveness views and variables
+	private ExpandableListView mTypeEffectiveness;
+	private EffectivenessAdapter mEffectivenessAdapter;
+	private ArrayList<EffectivenessGroup> mGroups = new ArrayList<EffectivenessGroup>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +73,7 @@ public class MainActivity extends ActionBarActivity {
 		mHelp = (LinearLayout) findViewById(R.id.help);
 		mData = (LinearLayout) findViewById(R.id.pokemon_data);
 		mLoading = (ProgressBar) findViewById(R.id.loading);
+		mListButton = (ImageButton) findViewById(R.id.list_button);
 		mImage = (ImageView) findViewById(R.id.pokemon_image);
 		mPokemonName = (TextView) findViewById(R.id.pokemon_name);
 		mPokemonType1 = (TextView) findViewById(R.id.pokemon_type1);
@@ -83,9 +93,6 @@ public class MainActivity extends ActionBarActivity {
 		mSearchBox = (ClearableAutoCompleteTextView) v
 		        .findViewById(R.id.search);
 
-		// Hide the search field
-		showSearch(false);
-
 		// Populate the AutoCompleteTextView with suggestions
 		ArrayList<PokemonSearchItem> pokemon = new ArrayList<PokemonSearchItem>();
 		String[] pokemon_names = getResources().getStringArray(
@@ -100,6 +107,14 @@ public class MainActivity extends ActionBarActivity {
 		Collections.sort(pokemon);
 		PokemonSuggestAdapter adapter = new PokemonSuggestAdapter(this, pokemon);
 		mSearchBox.setAdapter(adapter);
+
+		// Set the adapter on the type effectiveness ExpandableListView
+		mTypeEffectiveness = (ExpandableListView) findViewById(R.id.type_effectiveness);
+		mEffectivenessAdapter = new EffectivenessAdapter(this, mGroups);
+		mTypeEffectiveness.setAdapter(mEffectivenessAdapter);
+		
+		// Hide the search field
+		showSearch(false);
 
 		// When the search icon is clicked, hide search icon, show the search
 		// field
@@ -170,6 +185,46 @@ public class MainActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	// Fill the ExpandableListView groups with weaknesses, normal, and
+	// resistances
+	public void populateTypeEffectiveness(JSONArray w, JSONArray n, JSONArray r) {
+		mGroups.clear();
+
+		ArrayList<EffectivenessItem> weaknesses = new ArrayList<EffectivenessItem>();
+		addToTypeEffectivenessArray(weaknesses, w);
+		mGroups.add(new EffectivenessGroup(getString(R.string.weaknesses),
+		        weaknesses));
+
+		ArrayList<EffectivenessItem> normal = new ArrayList<EffectivenessItem>();
+		addToTypeEffectivenessArray(normal, n);
+		mGroups.add(new EffectivenessGroup(getString(R.string.normal_damage),
+		        normal));
+
+		ArrayList<EffectivenessItem> resistances = new ArrayList<EffectivenessItem>();
+		addToTypeEffectivenessArray(resistances, r);
+		mGroups.add(new EffectivenessGroup(getString(R.string.resistances),
+		        resistances));
+	}
+
+	// Parses a JSONArray of type/effectiveness pairs and adds it to the
+	// ArrayList
+	private void addToTypeEffectivenessArray(
+	        ArrayList<EffectivenessItem> array, JSONArray json) {
+		for (int i = 0; i < json.length(); i++) {
+			JSONObject item;
+			try {
+				item = json.getJSONObject(i);
+				String type = item.getString("attack");
+				int effectiveness = Integer.parseInt(item
+				        .getString("effectiveness"));
+				array.add(new EffectivenessItem(getResources().getIdentifier(
+				        type, "drawable", getPackageName()),
+				        capitalizeFirst(type), effectiveness));
+			} catch (Exception e) {
+			}
+		}
+	}
+
 	// Capitalize the first letter of a string
 	private String capitalizeFirst(String str) {
 		if (str.length() == 0)
@@ -187,10 +242,12 @@ public class MainActivity extends ActionBarActivity {
 
 		@Override
 		protected void onPreExecute() {
-			// Show loading spinner
-			mLoading.setVisibility(View.VISIBLE);
 			// Hide Pokemon info
 			mData.setVisibility(View.GONE);
+			// Hide list button
+			mListButton.setVisibility(View.GONE);
+			// Show loading spinner
+			mLoading.setVisibility(View.VISIBLE);
 			// Minimize the search field
 			showSearch(false);
 		}
@@ -204,9 +261,10 @@ public class MainActivity extends ActionBarActivity {
 			// Search for the Pokemon if there is an Internet connection
 			if (mNetworkConnected) {
 				mQuery = params[0];
-				
+
 				// Download data
-				AjaxRequest request = new AjaxRequest("GET", getPokemonUrl(mQuery));
+				AjaxRequest request = new AjaxRequest("GET",
+				        getPokemonUrl(mQuery));
 				JSONObject data;
 				try {
 					data = new JSONObject(request.send());
@@ -234,6 +292,11 @@ public class MainActivity extends ActionBarActivity {
 
 				// Update the Pokemon info
 				try {
+					// Update the type effectiveness ExpandableListView
+					populateTypeEffectiveness(
+					        result.mInfo.getJSONArray("weaknesses"),
+					        result.mInfo.getJSONArray("normal"),
+					        result.mInfo.getJSONArray("resistances"));
 
 					// Update the Pokemon name
 					mPokemonName.setText(result.mInfo.getString("name"));
@@ -260,12 +323,20 @@ public class MainActivity extends ActionBarActivity {
 
 				} catch (Exception e) {
 				}
-			}
-			else {
+				
+				// Update the type effectiveness ExpandableListView
+				mEffectivenessAdapter.notifyDataSetChanged();
+
+				// Expand the Weaknesses group, collapse the other two groups
+				mTypeEffectiveness.expandGroup(0);
+				mTypeEffectiveness.collapseGroup(1);
+				mTypeEffectiveness.collapseGroup(2);
+				mTypeEffectiveness.setSelectionAfterHeaderView();
+			} else {
 				// Display an error
 				String errorTitle = "";
 				String errorMessage = "";
-				
+
 				if (!mNetworkConnected) {
 					errorTitle = getString(R.string.error_title_no_internet);
 					errorMessage = getString(R.string.error_message_no_internet);
@@ -286,13 +357,14 @@ public class MainActivity extends ActionBarActivity {
 
 			// Hide loading spinner
 			mLoading.setVisibility(View.GONE);
+			// Show list button
+			mListButton.setVisibility(View.VISIBLE);
 			// Show Pokemon info
 			if (mHelp.getVisibility() == View.GONE) {
 				mData.setVisibility(View.VISIBLE);
 			}
 		}
 
-		
 		// Download an image from the imageUrl and return it.
 		private Bitmap downloadImage(String imageUrl) {
 			// If the image exists, recycle it, to prevent memory leaks.
@@ -338,7 +410,7 @@ public class MainActivity extends ActionBarActivity {
 			}
 			return false;
 		}
-		
+
 		// Display an error popup with the given title and message.
 		private void showError(String title, String message) {
 			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(

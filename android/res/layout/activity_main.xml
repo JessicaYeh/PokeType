@@ -100,9 +100,25 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="6" />
+            android:layout_weight="1.5" />
 
+        <ExpandableListView
+            android:id="@+id/type_effectiveness"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="4.25"
+            android:background="#7dffffff"
+            android:cacheColorHint="#00000000" />
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/list_button"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:background="@drawable/button_effect"
+        android:src="@drawable/ic_action_view_as_list"
+        android:gravity="center" />
 
     <ProgressBar
         android:id="@+id/loading"
