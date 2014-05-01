@@ -122,7 +122,7 @@ public class PokemonListAdapter extends ArrayAdapter<PokemonSearchItem>
 								newPokemon.add(mOriginalPokemon.get(i));
 							}
 						}
-						// Otherwise, filter by both types in any order
+						// Otherwise, filter by both types
 						else {
 							boolean compare11 = type1
 							        .equalsIgnoreCase(constraintType1);
@@ -132,9 +132,17 @@ public class PokemonListAdapter extends ArrayAdapter<PokemonSearchItem>
 							        .equalsIgnoreCase(constraintType1);
 							boolean compare22 = type2
 							        .equalsIgnoreCase(constraintType2);
-							if (compare11 || compare12 || compare21
-							        || compare22) {
-								newPokemon.add(mOriginalPokemon.get(i));
+							if (constraintType1.equalsIgnoreCase(emptyType1)
+							        || constraintType2.equalsIgnoreCase(emptyType2)) {
+								if (compare11 || compare12 || compare21
+								        || compare22) {
+									newPokemon.add(mOriginalPokemon.get(i));
+								}
+							} else {
+								if ((compare11 && compare22)
+								        || (compare12 && compare21)) {
+									newPokemon.add(mOriginalPokemon.get(i));
+								}
 							}
 						}
 					}

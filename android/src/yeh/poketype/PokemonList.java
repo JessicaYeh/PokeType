@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -20,10 +21,11 @@ public class PokemonList extends ActionBarActivity {
 	public final static String POKEMON_ID = "yeh.poketype.POKEMON_ID";
 	private SharedPreferences sharedPref;
 	private SharedPreferences.Editor editor;
-	
+
 	private Spinner mType1;
 	private Spinner mType2;
 	private ListView mListView;
+	private PokemonListAdapter mAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +53,6 @@ public class PokemonList extends ActionBarActivity {
 		for (int i = 0; i < pokemonNames.length; i++) {
 			pokemon.add(new PokemonSearchItem(i + 1, pokemonNames[i], null, pokemonTypes1[i], pokemonTypes2[i]));
 		}
-
-		// Insert the Pokemon into the ListView.
-		mListView = (ListView) findViewById(R.id.list);
-		PokemonListAdapter adapter = new PokemonListAdapter(this, pokemon);
-		mListView.setAdapter(adapter);
-		
-		// Set click listener on the list view
-		mListView.setOnItemClickListener(new PokemonClickListener());
 		
 		// Restore state information from shared preferences
 		int type1 = sharedPref.getInt("pokemon_type1", 0);
@@ -69,11 +63,26 @@ public class PokemonList extends ActionBarActivity {
 		if (type2 != 0) {
 			mType2.setSelection(type2);
 		}
+
+		// Insert the Pokemon into the ListView.
+		mListView = (ListView) findViewById(R.id.list);
+		mAdapter = new PokemonListAdapter(this, pokemon);
+		mListView.setAdapter(mAdapter);
+		filterByTypes(mType1.getItemAtPosition(mType1.getSelectedItemPosition()).toString(), 
+				mType2.getItemAtPosition(mType2.getSelectedItemPosition()).toString());
+		
+		// Set click listener on the list view
+		mListView.setOnItemClickListener(new PokemonClickListener());
+
+		// Set selected listeners on the spinners
+		mType1.setOnItemSelectedListener(typeSelectedListener);
+		mType2.setOnItemSelectedListener(typeSelectedListener);
+		
+		// Set listview position from the shared preferences
 		int position = sharedPref.getInt("pokemon_list_position", 0);
 		if (position != 0) {
 			mListView.setSelectionFromTop(position, 0);
 		}
-		adapter.getFilter().filter("fire|fire");
 	}
 
 	@Override
@@ -88,10 +97,9 @@ public class PokemonList extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	// Click listener for the Pokemon in the ListView. Returns to the 
+	// Click listener for the Pokemon in the ListView. Returns to the
 	// main activity and searches for that Pokemon.
-	private class PokemonClickListener implements
-	        ListView.OnItemClickListener {
+	private class PokemonClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 		        long id) {
@@ -103,13 +111,33 @@ public class PokemonList extends ActionBarActivity {
 			finish();
 		}
 	}
-	
+
+	OnItemSelectedListener typeSelectedListener = new OnItemSelectedListener() {
+		@Override
+		public void onItemSelected(AdapterView<?> parentView,
+		        View selectedItemView, int position, long id) {
+			String type1 = mType1.getItemAtPosition(
+			        mType1.getSelectedItemPosition()).toString();
+			String type2 = mType2.getItemAtPosition(
+			        mType2.getSelectedItemPosition()).toString();
+			filterByTypes(type1, type2);
+		}
+
+		@Override
+		public void onNothingSelected(AdapterView<?> parentView) {
+		}
+	};
+
+	private void filterByTypes(String type1, String type2) {
+		mAdapter.getFilter().filter(type1 + "|" + type2);
+	}
+
 	@Override
 	public void onBackPressed() {
-	    saveState();
-	    super.onBackPressed();
+		saveState();
+		super.onBackPressed();
 	}
-	
+
 	@Override
 	public void onPause() {
 		saveState();
@@ -119,7 +147,8 @@ public class PokemonList extends ActionBarActivity {
 	// Store information in the shared preferences so that when the list
 	// activity is opened again, things are in the same place
 	private void saveState() {
-		editor.putInt("pokemon_list_position", mListView.getFirstVisiblePosition());
+		editor.putInt("pokemon_list_position",
+		        mListView.getFirstVisiblePosition());
 		editor.putInt("pokemon_type1", mType1.getSelectedItemPosition());
 		editor.putInt("pokemon_type2", mType2.getSelectedItemPosition());
 		editor.commit();
