@@ -18,14 +18,20 @@ import android.widget.ListView;
 import android.widget.Spinner;
 
 public class PokemonList extends ActionBarActivity {
+	// Shared preferences
 	public final static String POKEMON_ID = "yeh.poketype.POKEMON_ID";
 	private SharedPreferences sharedPref;
 	private SharedPreferences.Editor editor;
 
+	// Views in UI
 	private Spinner mType1;
 	private Spinner mType2;
 	private ListView mListView;
 	private PokemonListAdapter mAdapter;
+	
+	// Spinner counts to prevent undesired onItemSelected calls
+	private int mSpinnerCount = 0;
+	private int mInitSpinnerCount = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,7 @@ public class PokemonList extends ActionBarActivity {
 		for (int i = 0; i < pokemonNames.length; i++) {
 			pokemon.add(new PokemonSearchItem(i + 1, pokemonNames[i], null, pokemonTypes1[i], pokemonTypes2[i]));
 		}
+		
 		
 		// Restore state information from shared preferences
 		int type1 = sharedPref.getInt("pokemon_type1", 0);
@@ -83,6 +90,9 @@ public class PokemonList extends ActionBarActivity {
 		if (position != 0) {
 			mListView.setSelectionFromTop(position, 0);
 		}
+		
+		// How many spinners are on the page
+		mSpinnerCount = 2;
 	}
 
 	@Override
@@ -116,12 +126,19 @@ public class PokemonList extends ActionBarActivity {
 		@Override
 		public void onItemSelected(AdapterView<?> parentView,
 		        View selectedItemView, int position, long id) {
-			String type1 = mType1.getItemAtPosition(
-			        mType1.getSelectedItemPosition()).toString();
-			String type2 = mType2.getItemAtPosition(
-			        mType2.getSelectedItemPosition()).toString();
-			filterByTypes(type1, type2);
-			saveState();
+			// Spinner counts to prevent undesired calls to onItemSelected
+			if (mInitSpinnerCount < mSpinnerCount) {
+				mInitSpinnerCount++;
+			}
+			else {
+				String type1 = mType1.getItemAtPosition(
+				        mType1.getSelectedItemPosition()).toString();
+				String type2 = mType2.getItemAtPosition(
+				        mType2.getSelectedItemPosition()).toString();
+				filterByTypes(type1, type2);
+				mListView.setSelectionAfterHeaderView();
+				saveState();
+			}
 		}
 
 		@Override
@@ -131,7 +148,6 @@ public class PokemonList extends ActionBarActivity {
 
 	private void filterByTypes(String type1, String type2) {
 		mAdapter.getFilter().filter(type1 + "|" + type2);
-		mListView.setSelectionAfterHeaderView();
 	}
 
 	@Override
