@@ -73,6 +73,7 @@ public class PokemonList extends ActionBarActivity {
 		if (position != 0) {
 			mListView.setSelectionFromTop(position, 0);
 		}
+		adapter.getFilter().filter("fire|fire");
 	}
 
 	@Override

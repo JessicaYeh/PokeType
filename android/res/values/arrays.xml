@@ -2,7 +2,7 @@
 <resources>
 
     <string-array name="types1">
-        <item>Type 1</item>
+        <item>@string/type_1</item>
         <item>Bug</item>
         <item>Dark</item>
         <item>Dragon</item>
@@ -23,7 +23,7 @@
         <item>Water</item>
     </string-array>
     <string-array name="types2">
-        <item>Type 2</item>
+        <item>@string/type_2</item>
         <item>Bug</item>
         <item>Dark</item>
         <item>Dragon</item>
