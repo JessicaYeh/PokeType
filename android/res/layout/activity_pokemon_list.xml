@@ -25,7 +25,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_margin="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="2.5dp"
                 android:entries="@array/types1" />
 
             <Spinner
@@ -33,7 +36,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_margin="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="2.5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="5dp"
                 android:entries="@array/types2" />
         </LinearLayout>
 

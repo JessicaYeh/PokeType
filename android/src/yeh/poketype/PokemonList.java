@@ -121,6 +121,7 @@ public class PokemonList extends ActionBarActivity {
 			String type2 = mType2.getItemAtPosition(
 			        mType2.getSelectedItemPosition()).toString();
 			filterByTypes(type1, type2);
+			saveState();
 		}
 
 		@Override
@@ -130,6 +131,7 @@ public class PokemonList extends ActionBarActivity {
 
 	private void filterByTypes(String type1, String type2) {
 		mAdapter.getFilter().filter(type1 + "|" + type2);
+		mListView.setSelectionAfterHeaderView();
 	}
 
 	@Override
