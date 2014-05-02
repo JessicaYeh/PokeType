@@ -14,8 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Filter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 public class PokemonList extends ActionBarActivity {
 	// Shared preferences
@@ -23,12 +25,14 @@ public class PokemonList extends ActionBarActivity {
 	private SharedPreferences sharedPref;
 	private SharedPreferences.Editor editor;
 
+	private PokemonListAdapter mAdapter;
+
 	// Views in UI
 	private Spinner mType1;
 	private Spinner mType2;
 	private ListView mListView;
-	private PokemonListAdapter mAdapter;
-	
+	private TextView mNoneFound;
+
 	// Spinner counts to prevent undesired onItemSelected calls
 	private int mSpinnerCount = 0;
 	private int mInitSpinnerCount = 0;
@@ -37,10 +41,12 @@ public class PokemonList extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_pokemon_list);
-		
+
 		// Get views
 		mType1 = (Spinner) findViewById(R.id.spinner_type1);
 		mType2 = (Spinner) findViewById(R.id.spinner_type2);
+		mListView = (ListView) findViewById(R.id.list);
+		mNoneFound = (TextView) findViewById(R.id.no_types_found);
 
 		// Open preferences file
 		sharedPref = PreferenceManager
@@ -57,10 +63,10 @@ public class PokemonList extends ActionBarActivity {
 		String[] pokemonTypes2 = res.getStringArray(R.array.pokemon_types2);
 		// Create the list of Pokemon.
 		for (int i = 0; i < pokemonNames.length; i++) {
-			pokemon.add(new PokemonSearchItem(i + 1, pokemonNames[i], null, pokemonTypes1[i], pokemonTypes2[i]));
+			pokemon.add(new PokemonSearchItem(i + 1, pokemonNames[i], null,
+			        pokemonTypes1[i], pokemonTypes2[i]));
 		}
-		
-		
+
 		// Restore state information from shared preferences
 		int type1 = sharedPref.getInt("pokemon_type1", 0);
 		if (type1 != 0) {
@@ -72,25 +78,27 @@ public class PokemonList extends ActionBarActivity {
 		}
 
 		// Insert the Pokemon into the ListView.
-		mListView = (ListView) findViewById(R.id.list);
 		mAdapter = new PokemonListAdapter(this, pokemon);
 		mListView.setAdapter(mAdapter);
-		filterByTypes(mType1.getItemAtPosition(mType1.getSelectedItemPosition()).toString(), 
-				mType2.getItemAtPosition(mType2.getSelectedItemPosition()).toString());
-		
+		filterByTypes(
+		        mType1.getItemAtPosition(mType1.getSelectedItemPosition())
+		                .toString(),
+		        mType2.getItemAtPosition(mType2.getSelectedItemPosition())
+		                .toString());
+
 		// Set click listener on the list view
 		mListView.setOnItemClickListener(new PokemonClickListener());
 
 		// Set selected listeners on the spinners
 		mType1.setOnItemSelectedListener(typeSelectedListener);
 		mType2.setOnItemSelectedListener(typeSelectedListener);
-		
+
 		// Set listview position from the shared preferences
 		int position = sharedPref.getInt("pokemon_list_position", 0);
 		if (position != 0) {
 			mListView.setSelectionFromTop(position, 0);
 		}
-		
+
 		// How many spinners are on the page
 		mSpinnerCount = 2;
 	}
@@ -129,8 +137,7 @@ public class PokemonList extends ActionBarActivity {
 			// Spinner counts to prevent undesired calls to onItemSelected
 			if (mInitSpinnerCount < mSpinnerCount) {
 				mInitSpinnerCount++;
-			}
-			else {
+			} else {
 				String type1 = mType1.getItemAtPosition(
 				        mType1.getSelectedItemPosition()).toString();
 				String type2 = mType2.getItemAtPosition(
@@ -147,7 +154,19 @@ public class PokemonList extends ActionBarActivity {
 	};
 
 	private void filterByTypes(String type1, String type2) {
-		mAdapter.getFilter().filter(type1 + "|" + type2);
+		// Filter by the two types selected in the Spinners
+		mAdapter.getFilter().filter(type1 + "|" + type2,
+		        new Filter.FilterListener() {
+			        public void onFilterComplete(int count) {
+				        // Display a message if there are no Pokemon with the
+				        // selected combination of types.
+				        if (count == 0) {
+					        mNoneFound.setVisibility(View.VISIBLE);
+				        } else {
+					        mNoneFound.setVisibility(View.GONE);
+				        }
+			        }
+		        });
 	}
 
 	@Override

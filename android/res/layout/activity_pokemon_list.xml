@@ -17,29 +17,29 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="#fff" >
+            android:background="#fff"
+            android:orientation="horizontal" >
 
             <Spinner
                 android:id="@+id/spinner_type1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginTop="5dp"
-                android:layout_marginLeft="5dp"
                 android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
                 android:layout_marginRight="2.5dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="1"
                 android:entries="@array/types1" />
 
             <Spinner
                 android:id="@+id/spinner_type2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginTop="5dp"
-                android:layout_marginLeft="2.5dp"
                 android:layout_marginBottom="5dp"
+                android:layout_marginLeft="2.5dp"
                 android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_weight="1"
                 android:entries="@array/types2" />
         </LinearLayout>
 
@@ -50,5 +50,16 @@
             android:background="@color/less_transparent_white"
             android:cacheColorHint="#00000000" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/no_types_found"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="@string/no_types_found"
+        android:textSize="20sp"
+        android:textColor="#666"
+        android:visibility="gone" />
 
 </FrameLayout>
