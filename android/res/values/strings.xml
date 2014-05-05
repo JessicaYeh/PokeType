@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="developer">Developer: Jessica Yeh</string>
     <string name="app_name">PokéType</string>
     <string name="search_hint">Search Pokémon</string>
     <string name="weaknesses">Weaknesses</string>
@@ -17,6 +18,6 @@
     <string name="error_exit">OK</string>
     <string name="type_1">Type 1</string>
     <string name="type_2">Type 2</string>
-    <string name="no_types_found">There are no Pokémon with this type combination.</string>
+    <string name="no_types_found">There are no Pokémon with this combination of types.</string>
 
 </resources>

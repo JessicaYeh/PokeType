@@ -49,6 +49,7 @@ public class MainActivity extends ActionBarActivity {
 	private SharedPreferences.Editor editor;
 
 	// Action bar views
+	private TextView mTitle;
 	private ClearableAutoCompleteTextView mSearchBox;
 	private ImageView mSearchIcon;
 
@@ -104,6 +105,7 @@ public class MainActivity extends ActionBarActivity {
 		actionBar.setCustomView(v);
 
 		// Get handles to action bar items
+		mTitle = (TextView) v.findViewById(R.id.app_name);
 		mSearchIcon = (ImageView) v.findViewById(R.id.search_icon);
 		mSearchBox = (ClearableAutoCompleteTextView) v
 		        .findViewById(R.id.search);
@@ -495,6 +497,7 @@ public class MainActivity extends ActionBarActivity {
 			mSearchBox.setText("");
 			mSearchBox.setVisibility(View.GONE);
 			mSearchIcon.setVisibility(View.VISIBLE);
+			mTitle.setVisibility(View.VISIBLE);
 			// hide the keyboard
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(mSearchBox.getWindowToken(), 0);
@@ -502,6 +505,7 @@ public class MainActivity extends ActionBarActivity {
 			// hide search icon and show search box
 			mSearchIcon.setVisibility(View.GONE);
 			mSearchBox.setVisibility(View.VISIBLE);
+			mTitle.setVisibility(View.GONE);
 			mSearchBox.requestFocus();
 			// show the keyboard
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
