@@ -2,6 +2,7 @@ package yeh.poketype;
 
 import java.util.ArrayList;
 
+import yeh.poketype.ClearableAutoCompleteTextView.OnClearListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +28,7 @@ import android.widget.TextView;
 
 public class PokemonList extends ActionBarActivity {
 	// Shared preferences
-	public final static String POKEMON_ID = "yeh.poketype.POKEMON_ID";
+	public final static String POKEMON_QUERY = "yeh.poketype.POKEMON_QUERY";
 	private SharedPreferences sharedPref;
 	private SharedPreferences.Editor editor;
 
@@ -111,6 +113,11 @@ public class PokemonList extends ActionBarActivity {
 				mType2.getItemAtPosition(mType2.getSelectedItemPosition())
 						.toString());
 
+		// Populate the AutoCompleteTextView with suggestions
+		ArrayList<PokemonSearchItem> sortedPokemon = new ArrayList<PokemonSearchItem>(pokemon);
+		PokemonSuggestAdapter adapter = new PokemonSuggestAdapter(this, sortedPokemon);
+		mSearchBox.setAdapter(adapter);
+
 		// Set click listener on the list view
 		mListView.setOnItemClickListener(new PokemonClickListener());
 
@@ -129,6 +136,50 @@ public class PokemonList extends ActionBarActivity {
 
 		// Hide the search field
 		showSearch(false);
+
+		// When the search icon is clicked, hide search icon, show the search
+		// field
+		mSearchIcon.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showSearch(true);
+			}
+		});
+
+		// When the search field is cleared, hide it, and show the search icon
+		mSearchBox.setOnClearListener(new OnClearListener() {
+			@Override
+			public void onClear() {
+				showSearch(false);
+			}
+		});
+
+		// When 'enter' is pressed in the search field, execute the search
+		mSearchBox.setOnKeyListener(new View.OnKeyListener() {
+			@Override
+			public boolean onKey(View view, int keyCode, KeyEvent event) {
+				// Determine if the enter key was pressed
+				if (event.getAction() == KeyEvent.ACTION_DOWN
+						&& event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+					// Initiate a Pokemon search using the search contents
+					search(mSearchBox.getText().toString());
+					return true;
+				}
+				return false;
+			}
+		});
+
+		// When a suggestion is clicked, execute the search
+		mSearchBox
+				.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view,
+							int position, long id) {
+						// Initiate a Pokemon search using the suggestion
+						// clicked
+						search(""+id);
+					}
+				});
 	}
 
 	@Override
@@ -149,12 +200,7 @@ public class PokemonList extends ActionBarActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
 				long id) {
-			// Pass the selected Pokemon id to the main screen
-			Intent mIntent = new Intent();
-			mIntent.putExtra(POKEMON_ID, "" + id);
-			setResult(Activity.RESULT_OK, mIntent);
-			saveState();
-			finish();
+			search(""+id);
 		}
 	}
 
@@ -217,6 +263,15 @@ public class PokemonList extends ActionBarActivity {
 		editor.putInt("pokemon_type1", mType1.getSelectedItemPosition());
 		editor.putInt("pokemon_type2", mType2.getSelectedItemPosition());
 		editor.commit();
+	}
+	
+	// Pass the selected Pokemon id/name to the main screen
+	private void search(String query) {
+		Intent mIntent = new Intent();
+		mIntent.putExtra(POKEMON_QUERY, query);
+		setResult(Activity.RESULT_OK, mIntent);
+		saveState();
+		finish();
 	}
 
 	// this toggles between the visibility of the search icon and the search box

@@ -1,6 +1,7 @@
 package yeh.poketype;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 
 import android.content.Context;
@@ -23,6 +24,7 @@ public class PokemonSuggestAdapter extends ArrayAdapter<PokemonSearchItem>
 		super(context, android.R.layout.simple_dropdown_item_1line,
 				android.R.id.text1, pokemon);
 		mContext = context;
+		Collections.sort(pokemon);
 		mOriginalPokemon = pokemon;
 		mPokemon = pokemon;
 	}

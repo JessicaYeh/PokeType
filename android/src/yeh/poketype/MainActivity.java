@@ -2,7 +2,6 @@ package yeh.poketype;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Locale;
 
 import org.json.JSONArray;
@@ -116,7 +115,6 @@ public class MainActivity extends ActionBarActivity {
 		for (int i = 0; i < pokemon_names.length; i++) {
 			pokemon.add(new PokemonSearchItem(i + 1, pokemon_names[i]));
 		}
-		Collections.sort(pokemon);
 		PokemonSuggestAdapter adapter = new PokemonSuggestAdapter(this, pokemon);
 		mSearchBox.setAdapter(adapter);
 
@@ -160,10 +158,8 @@ public class MainActivity extends ActionBarActivity {
 				// Determine if the enter key was pressed
 				if (event.getAction() == KeyEvent.ACTION_DOWN
 				        && event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-					// Handle for the search field
-					ClearableAutoCompleteTextView search = (ClearableAutoCompleteTextView) view;
 					// Initiate a Pokemon search using the search contents
-					new SearchTask().execute(search.getText().toString());
+					new SearchTask().execute(mSearchBox.getText().toString());
 					return true;
 				}
 				return false;
@@ -230,7 +226,7 @@ public class MainActivity extends ActionBarActivity {
 	// Get the Pokemon id from the Pokemon list activity and search for it
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-			String id = data.getStringExtra(PokemonList.POKEMON_ID);
+			String id = data.getStringExtra(PokemonList.POKEMON_QUERY);
 			if (!id.equals("")) {
 				new SearchTask().execute(id);
 			}
