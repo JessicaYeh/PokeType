@@ -2,3 +2,4 @@ android/bin/
 android/gen/
 api/Slim
 api/.htaccess
+.DS_Store
