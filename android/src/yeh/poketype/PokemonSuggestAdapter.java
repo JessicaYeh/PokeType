@@ -12,14 +12,17 @@ import android.widget.Filterable;
 import android.widget.TextView;
 
 public class PokemonSuggestAdapter extends ArrayAdapter<PokemonSearchItem>
-        implements Filterable {
+		implements Filterable {
+	private Context mContext;
 	private ArrayList<PokemonSearchItem> mOriginalPokemon;
 	private ArrayList<PokemonSearchItem> mPokemon;
 	private Filter mFilter;
 
-	public PokemonSuggestAdapter(Context context, ArrayList<PokemonSearchItem> pokemon) {
+	public PokemonSuggestAdapter(Context context,
+			ArrayList<PokemonSearchItem> pokemon) {
 		super(context, android.R.layout.simple_dropdown_item_1line,
-		        android.R.id.text1, pokemon);
+				android.R.id.text1, pokemon);
+		mContext = context;
 		mOriginalPokemon = pokemon;
 		mPokemon = pokemon;
 	}
@@ -29,8 +32,11 @@ public class PokemonSuggestAdapter extends ArrayAdapter<PokemonSearchItem>
 		View v = super.getView(position, convertView, parent);
 
 		TextView text = (TextView) v.findViewById(android.R.id.text1);
-		text.setCompoundDrawablesWithIntrinsicBounds(getItem(position).mIcon,
-		        null, null, null);
+
+		String paddedId = String.format("%03d", getItem(position).mId);
+		text.setCompoundDrawablesWithIntrinsicBounds(
+				mContext.getResources().getIdentifier("pokemon" + paddedId,
+						"drawable", mContext.getPackageName()), 0, 0, 0);
 
 		return v;
 	}
@@ -76,9 +82,9 @@ public class PokemonSuggestAdapter extends ArrayAdapter<PokemonSearchItem>
 				for (int i = 0; i < mOriginalPokemon.size(); i++) {
 					String item = mOriginalPokemon.get(i).mName;
 					String lowerPokemon1 = item
-					        .toLowerCase(Locale.getDefault());
+							.toLowerCase(Locale.getDefault());
 					String lowerPokemon2 = constraintString.toLowerCase(Locale
-					        .getDefault());
+							.getDefault());
 					if (lowerPokemon1.startsWith(lowerPokemon2)) {
 						newPokemon.add(mOriginalPokemon.get(i));
 					}
@@ -93,7 +99,7 @@ public class PokemonSuggestAdapter extends ArrayAdapter<PokemonSearchItem>
 		@SuppressWarnings("unchecked")
 		@Override
 		protected void publishResults(CharSequence constraint,
-		        FilterResults results) {
+				FilterResults results) {
 			mPokemon = (ArrayList<PokemonSearchItem>) results.values;
 			notifyDataSetChanged();
 		}

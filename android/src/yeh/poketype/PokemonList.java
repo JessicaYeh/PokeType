@@ -3,18 +3,23 @@ package yeh.poketype;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Filter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -26,6 +31,11 @@ public class PokemonList extends ActionBarActivity {
 	private SharedPreferences.Editor editor;
 
 	private PokemonListAdapter mAdapter;
+
+	// Action bar views
+	private TextView mTitle;
+	private ClearableAutoCompleteTextView mSearchBox;
+	private ImageView mSearchIcon;
 
 	// Views in UI
 	private Spinner mType1;
@@ -50,8 +60,23 @@ public class PokemonList extends ActionBarActivity {
 
 		// Open preferences file
 		sharedPref = PreferenceManager
-		        .getDefaultSharedPreferences(getApplicationContext());
+				.getDefaultSharedPreferences(getApplicationContext());
 		editor = sharedPref.edit();
+
+		// Inflate custom view that has a search field for action bar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM
+				| ActionBar.DISPLAY_USE_LOGO | ActionBar.DISPLAY_SHOW_HOME);
+		LayoutInflater inflater = (LayoutInflater) this
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View v = inflater.inflate(R.layout.action_search, null);
+		actionBar.setCustomView(v);
+
+		// Get handles to action bar items
+		mTitle = (TextView) v.findViewById(R.id.app_name);
+		mSearchIcon = (ImageView) v.findViewById(R.id.search_icon);
+		mSearchBox = (ClearableAutoCompleteTextView) v
+				.findViewById(R.id.search);
 
 		ArrayList<PokemonSearchItem> pokemon = new ArrayList<PokemonSearchItem>();
 
@@ -63,8 +88,8 @@ public class PokemonList extends ActionBarActivity {
 		String[] pokemonTypes2 = res.getStringArray(R.array.pokemon_types2);
 		// Create the list of Pokemon.
 		for (int i = 0; i < pokemonNames.length; i++) {
-			pokemon.add(new PokemonSearchItem(i + 1, pokemonNames[i], null,
-			        pokemonTypes1[i], pokemonTypes2[i]));
+			pokemon.add(new PokemonSearchItem(i + 1, pokemonNames[i],
+					pokemonTypes1[i], pokemonTypes2[i]));
 		}
 
 		// Restore state information from shared preferences
@@ -81,10 +106,10 @@ public class PokemonList extends ActionBarActivity {
 		mAdapter = new PokemonListAdapter(this, pokemon);
 		mListView.setAdapter(mAdapter);
 		filterByTypes(
-		        mType1.getItemAtPosition(mType1.getSelectedItemPosition())
-		                .toString(),
-		        mType2.getItemAtPosition(mType2.getSelectedItemPosition())
-		                .toString());
+				mType1.getItemAtPosition(mType1.getSelectedItemPosition())
+						.toString(),
+				mType2.getItemAtPosition(mType2.getSelectedItemPosition())
+						.toString());
 
 		// Set click listener on the list view
 		mListView.setOnItemClickListener(new PokemonClickListener());
@@ -101,6 +126,9 @@ public class PokemonList extends ActionBarActivity {
 
 		// How many spinners are on the page
 		mSpinnerCount = 2;
+
+		// Hide the search field
+		showSearch(false);
 	}
 
 	@Override
@@ -120,7 +148,7 @@ public class PokemonList extends ActionBarActivity {
 	private class PokemonClickListener implements ListView.OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
-		        long id) {
+				long id) {
 			// Pass the selected Pokemon id to the main screen
 			Intent mIntent = new Intent();
 			mIntent.putExtra(POKEMON_ID, "" + id);
@@ -133,15 +161,15 @@ public class PokemonList extends ActionBarActivity {
 	OnItemSelectedListener typeSelectedListener = new OnItemSelectedListener() {
 		@Override
 		public void onItemSelected(AdapterView<?> parentView,
-		        View selectedItemView, int position, long id) {
+				View selectedItemView, int position, long id) {
 			// Spinner counts to prevent undesired calls to onItemSelected
 			if (mInitSpinnerCount < mSpinnerCount) {
 				mInitSpinnerCount++;
 			} else {
 				String type1 = mType1.getItemAtPosition(
-				        mType1.getSelectedItemPosition()).toString();
+						mType1.getSelectedItemPosition()).toString();
 				String type2 = mType2.getItemAtPosition(
-				        mType2.getSelectedItemPosition()).toString();
+						mType2.getSelectedItemPosition()).toString();
 				filterByTypes(type1, type2);
 				mListView.setSelectionAfterHeaderView();
 				saveState();
@@ -156,17 +184,17 @@ public class PokemonList extends ActionBarActivity {
 	private void filterByTypes(String type1, String type2) {
 		// Filter by the two types selected in the Spinners
 		mAdapter.getFilter().filter(type1 + "|" + type2,
-		        new Filter.FilterListener() {
-			        public void onFilterComplete(int count) {
-				        // Display a message if there are no Pokemon with the
-				        // selected combination of types.
-				        if (count == 0) {
-					        mNoneFound.setVisibility(View.VISIBLE);
-				        } else {
-					        mNoneFound.setVisibility(View.GONE);
-				        }
-			        }
-		        });
+				new Filter.FilterListener() {
+					public void onFilterComplete(int count) {
+						// Display a message if there are no Pokemon with the
+						// selected combination of types.
+						if (count == 0) {
+							mNoneFound.setVisibility(View.VISIBLE);
+						} else {
+							mNoneFound.setVisibility(View.GONE);
+						}
+					}
+				});
 	}
 
 	@Override
@@ -185,9 +213,34 @@ public class PokemonList extends ActionBarActivity {
 	// activity is opened again, things are in the same place
 	private void saveState() {
 		editor.putInt("pokemon_list_position",
-		        mListView.getFirstVisiblePosition());
+				mListView.getFirstVisiblePosition());
 		editor.putInt("pokemon_type1", mType1.getSelectedItemPosition());
 		editor.putInt("pokemon_type2", mType2.getSelectedItemPosition());
 		editor.commit();
+	}
+
+	// this toggles between the visibility of the search icon and the search box
+	// to show search icon - reset = true
+	// to show search box - reset = false
+	protected void showSearch(boolean show) {
+		if (!show) {
+			// hide search box and show search icon
+			mSearchBox.setText("");
+			mSearchBox.setVisibility(View.GONE);
+			mSearchIcon.setVisibility(View.VISIBLE);
+			mTitle.setVisibility(View.VISIBLE);
+			// hide the keyboard
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(mSearchBox.getWindowToken(), 0);
+		} else {
+			// hide search icon and show search box
+			mSearchIcon.setVisibility(View.GONE);
+			mSearchBox.setVisibility(View.VISIBLE);
+			mTitle.setVisibility(View.GONE);
+			mSearchBox.requestFocus();
+			// show the keyboard
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(mSearchBox, InputMethodManager.SHOW_IMPLICIT);
+		}
 	}
 }

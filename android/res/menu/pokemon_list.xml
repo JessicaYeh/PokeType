@@ -3,4 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="yeh.poketype.PokemonList" >
 
+    <item
+        android:id="@+id/developer"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/developer"/>
+
 </menu>

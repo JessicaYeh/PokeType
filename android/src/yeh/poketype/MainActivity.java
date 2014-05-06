@@ -15,7 +15,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -114,13 +113,9 @@ public class MainActivity extends ActionBarActivity {
 		ArrayList<PokemonSearchItem> pokemon = new ArrayList<PokemonSearchItem>();
 		String[] pokemon_names = getResources().getStringArray(
 		        R.array.pokemon_names);
-		TypedArray icons = getResources().obtainTypedArray(
-		        R.array.pokemon_icons);
-		for (int i = 0; i < icons.length(); i++) {
-			pokemon.add(new PokemonSearchItem(i + 1, pokemon_names[i], icons
-			        .getDrawable(i)));
+		for (int i = 0; i < pokemon_names.length; i++) {
+			pokemon.add(new PokemonSearchItem(i + 1, pokemon_names[i]));
 		}
-		icons.recycle();
 		Collections.sort(pokemon);
 		PokemonSuggestAdapter adapter = new PokemonSuggestAdapter(this, pokemon);
 		mSearchBox.setAdapter(adapter);
